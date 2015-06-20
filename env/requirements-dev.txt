@@ -1,0 +1,5 @@
+ipdb
+httpie
+sphinx
+mock
+ansible
