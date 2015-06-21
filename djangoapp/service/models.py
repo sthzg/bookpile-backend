@@ -8,7 +8,23 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_pgjson.fields import JsonBField
 
-class Author(models.Model):
+
+class TimestampedMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    created = models.DateTimeField(
+        _('created'),
+        auto_now_add=True
+    )
+
+    modified = models.DateTimeField(
+        _('last modified'),
+        auto_now=True
+    )
+
+
+class Author(TimestampedMixin):
     class Meta:
         verbose_name = _('author')
         verbose_name_plural = _('authors')
@@ -29,22 +45,12 @@ class Author(models.Model):
         default=None
     )
 
-    created = models.DateTimeField(
-        _('created'),
-        auto_now_add=True
-    )
-
-    modified = models.DateTimeField(
-        _('last modified'),
-        auto_now=True
-    )
-
     @six.python_2_unicode_compatible
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name)
 
 
-class Publisher(models.Model):
+class Publisher(TimestampedMixin):
     class Meta:
         verbose_name = _('publisher')
         verbose_name_plural = _('publishers')
@@ -56,22 +62,12 @@ class Publisher(models.Model):
         null=False
     )
 
-    created = models.DateTimeField(
-        _('created'),
-        auto_now_add=True
-    )
-
-    modified = models.DateTimeField(
-        _('last modified'),
-        auto_now=True
-    )
-
     @six.python_2_unicode_compatible
     def __str__(self):
         return '{}'.format(self.name)
 
 
-class Book(models.Model):
+class Book(TimestampedMixin):
     class Meta:
         verbose_name = _('book')
         verbose_name_plural = _('books')
@@ -114,22 +110,12 @@ class Book(models.Model):
         null=True
     )
 
-    created = models.DateTimeField(
-        _('created'),
-        auto_now_add=True
-    )
-
-    modified = models.DateTimeField(
-        _('last modified'),
-        auto_now=True
-    )
-
     @six.python_2_unicode_compatible
     def __str__(self):
         return '{}'.format(self.title)
 
 
-class Chapter(models.Model):
+class Chapter(TimestampedMixin):
     class Meta:
         verbose_name = _('chapter')
         verbose_name_plural = _('chapters')
@@ -147,22 +133,12 @@ class Chapter(models.Model):
         verbose_name=_('book')
     )
 
-    created = models.DateTimeField(
-        _('created'),
-        auto_now_add=True
-    )
-
-    modified = models.DateTimeField(
-        _('last modified'),
-        auto_now=True
-    )
-
     @six.python_2_unicode_compatible
     def __str__(self):
         return '{}'.format(self.title)
 
 
-class Document(models.Model):
+class Document(TimestampedMixin):
     class Meta:
         verbose_name = _('document')
         verbose_name_plural = _('documents')
@@ -210,16 +186,35 @@ class Document(models.Model):
         default=None
     )
 
-    created = models.DateTimeField(
-        _('created'),
-        auto_now_add=True
-    )
+    @six.python_2_unicode_compatible
+    def __str__(self):
+        return 'document {}'.format(self.pk)
 
-    modified = models.DateTimeField(
-        _('last modified'),
-        auto_now=True
+
+class MyBook(TimestampedMixin):
+    """ An instance belonging to each user to store individual data on a book. 
+
+    Whenever a user contributes data to a book an instance of `MyBook` 
+    will be created. It relates the `user` to that `book` and makes it the
+    central node all user-related book data (reviews, chapter summaries, 
+    but also additional images and private notes) is connected to.
+    """
+    class Meta:
+        verbose_name = _('my book')
+        verbose_name_plural = _('my books')
+
+    user = settings.AUTH_USER_MODEL
+
+    book = models.ForeignKey(
+        'Book',
+        verbose_name=_('book'),
+        related_name='rel_book_mybook',
+        blank=False,
+        null=False,
+        default=None
     )
 
     @six.python_2_unicode_compatible
     def __str__(self):
-        return 'document {}'.format(self.pk)
+        return '{} documents for {}'.format(self.user.get_username(), self.book)
+
