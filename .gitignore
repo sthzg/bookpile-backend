@@ -54,3 +54,4 @@ target/
 env/env_vars/.env
 djangoapp/_bowerdir/bower_components
 /logs/*.log
+*.swp
