@@ -203,8 +203,10 @@ class MyBook(TimestampedMixin):
         verbose_name = _('my book')
         verbose_name_plural = _('my books')
 
+    #: The user owning this instance.
     user = settings.AUTH_USER_MODEL
 
+    #: The book that this instance relates to.
     book = models.ForeignKey(
         'Book',
         verbose_name=_('book'),
