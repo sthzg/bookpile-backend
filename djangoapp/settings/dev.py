@@ -37,12 +37,14 @@ EMAIL_HOST_USER = get_env_variable('DJ_PROJECT_DEV_EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = get_env_variable('DJ_PROJECT_DEV_EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = get_env_variable('DJ_PROJECT_DEV_EMAIL_USE_TLS')
 
-
 # Django Cors Headers
 CORS_ORIGIN_WHITELIST = (
-    'localhost:8080',
+    '{}://{}:{}'.format(
+        get_env_variable('DJ_PROJECT_DEV_FRONTEND_PROTO'),
+        get_env_variable('DJ_PROJECT_DEV_FRONTEND_HOST'),
+        get_env_variable('DJ_PROJECT_DEV_FRONTEND_PORT'),
+    )
 )
-
 
 # Celery
 CELERY_ENABLE_UTC = True
