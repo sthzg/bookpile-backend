@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -38,6 +39,15 @@ class AuthorApiView(viewsets.ModelViewSet):
     """
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
+
+    def get_queryset(self):
+        queryset = Author.objects.all()
+        search_phrase = self.request.query_params.get('search', None)
+        if search_phrase:
+            tokens = search_phrase.split(' ')
+            query = [Q(search_field__icontains=token) for token in tokens]
+            queryset = queryset.filter(*query)
+        return queryset
 
 
 class BookApiView(viewsets.ModelViewSet):

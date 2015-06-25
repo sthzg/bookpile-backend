@@ -11,7 +11,7 @@ urlpatterns = [
     url(r'^index/$', apiviews.IndexApiView.as_view(), name='index'),
 ]
 
-router = routers.SimpleRouter()
+router = routers.SimpleRouter(trailing_slash=False)
 router.register(r'authors', apiviews.AuthorApiView)
 router.register(r'books', apiviews.BookApiView)
 router.register(r'chapters', apiviews.ChapterApiView)

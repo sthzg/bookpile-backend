@@ -29,6 +29,7 @@ class Author(TimestampedMixin):
         verbose_name = _('author')
         verbose_name_plural = _('authors')
 
+    #: The author's first name
     first_name = models.CharField(
         _('first name'),
         max_length=40,
@@ -37,13 +38,31 @@ class Author(TimestampedMixin):
         default=None
     )
 
+    #: The author's last name
     last_name = models.CharField(
-        _('first name'),
+        _('last name'),
         max_length=40,
         blank=True,
         null=True,
         default=None
     )
+
+    #: This is a temporary solution to have a single, indexed field to 
+    #: query author name searches against. The value is populated 
+    #: automatically during `save()`.
+    search_field = models.CharField(
+        _('search index'),
+        max_length=80,
+        editable=False,
+        db_index=True,
+        blank=True,
+        null=True,
+        default=None
+    )
+
+    def save(self, *args, **kwargs):
+        self.search_field = '{} {}'.format(self.first_name, self.last_name)
+        super(Author, self).save(*args, **kwargs)
 
     @six.python_2_unicode_compatible
     def __str__(self):
@@ -161,13 +180,13 @@ class Document(TimestampedMixin):
         default=None
     )
 
-    #: Every document may relate to different targets, e.g. to books, 
+    #: Every document may relate to different targets, e.g. to books,
     #: chapters, authors, or even other documents.
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
-    #: The document type specifies which fields the document will provide 
+    #: The document type specifies which fields the document will provide
     #: for users to enter.
     document_type = models.CharField(
         _('type'),
@@ -194,9 +213,9 @@ class Document(TimestampedMixin):
 class MyBook(TimestampedMixin):
     """ An instance belonging to each user to store individual data on a book. 
 
-    Whenever a user contributes data to a book an instance of `MyBook` 
+    Whenever a user contributes data to a book an instance of `MyBook`
     will be created. It relates the `user` to that `book` and makes it the
-    central node all user-related book data (reviews, chapter summaries, 
+    central node all user-related book data (reviews, chapter summaries,
     but also additional images and private notes) is connected to.
     """
     class Meta:
